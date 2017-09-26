@@ -1,2 +1,8 @@
 # CPE_350
-Capstone Project for Seng's CPE 350 class
+Cal Poly Capstone Project led by Dr. Seng
+
+Members:
+Garrett Chan
+Varun Iyengar
+Lara Luu
+Bevin Tang
