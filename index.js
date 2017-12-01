@@ -27,7 +27,7 @@ exports.lakki = (req, res) => {
       let text = req.body.result.parameters['any'];   // any is a required parameter
       callGoogleSearchAPI(text).then((output) => {
          res.setHeader('Content-Type', 'application/json');
-         res.send(JSON.stringify({ 'speech': output, 'displayText': output }));    
+         res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
       }).catch((error) => {
          res.setHeader('Content-Type', 'application/json');
          res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
@@ -66,7 +66,7 @@ exports.lakki = (req, res) => {
      });
    }
 };
-   
+
 function callWeatherApi (city, date) {
   return new Promise((resolve, reject) => {
     // Create the path for the HTTP request to get the weather
@@ -85,10 +85,10 @@ function callWeatherApi (city, date) {
         let conditions = response['data']['current_condition'][0];
         let currentConditions = conditions['weatherDesc'][0]['value'];
         // Create response
-        let output = `Current conditions in the ${location['type']} 
+        let output = `Current conditions in the ${location['type']}
         ${location['query']} are ${currentConditions} with a projected high of
-        ${forecast['maxtempC']}C or ${forecast['maxtempF']}F and a low of 
-        ${forecast['mintempC']}C or ${forecast['mintempF']}F on 
+        ${forecast['maxtempC']}C or ${forecast['maxtempF']}F and a low of
+        ${forecast['mintempC']}C or ${forecast['mintempF']}F on
         ${forecast['date']}.`;
         // Resolve the promise with the output text
         console.log(output);
@@ -114,7 +114,7 @@ function callGoogleSearchAPI (text) {
         res.on('end', () => {
           // After all the data has been received parse the JSON for desired data
          let response = JSON.parse(body);
-  
+
          let items = response['items'];
 
          let totalResults = response['searchInformation'];
@@ -138,4 +138,3 @@ function callGoogleSearchAPI (text) {
       });
   });
 }
-
