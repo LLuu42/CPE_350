@@ -13,46 +13,68 @@
 
 'use strict';
 const http = require('http');
-const host = 'api.worldweatheronline.com';
-const wwoApiKey = 'b5d214a5bab843b49c1172848170811';
-exports.lakki = (req, res) => {
-  // Get the city and date from the request
-  let city = req.body.result.parameters['geo-city']; // city is a required param
-  let state = "";
-  let country = "";
-  if(req.body.result.parameters['geo-state-us'] != ""){
-     state = "," + req.body.result.parameters['geo-state-us'];
-  }
-  if(req.body.result.parameters['geo-country'] != ""){
-     country = "," + req.body.result.parameters['geo-country'];
-  }
-  city = city + state + country;
-  // Get the date for the weather forecast (if present)
-  let date = '';
-  if (req.body.result.parameters['date']) {
-    date = req.body.result.parameters['date'];
-    console.log('Date: ' + date);
-  }
-  // Call the weather API
-  callWeatherApi(city, date).then((output) => {
-    // Return the results of the weather API to Dialogflow
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
-  }).catch((error) => {
-    // If there is an error let the user know
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
-  });
-};
+const weather_host = 'api.worldweatheronline.com';
+const weather_api_key = 'b5d214a5bab843b49c1172848170811';
 
+const search_host = 'www.googleapis.com';
+const search_api_key = 'AlzaSyBHR7ched0g9KlxpWAzAZe1ld_7yi8Xovo';
+const cse_id = '007799595185471624536:jdruqtribrg';
+exports.lakki = (req, res) => {
+
+   let intent = req.body.result.metadata['intentName'];
+
+   if(intent == "my_google_search"){
+      let text = req.body.result.parameters['any'];   // any is a required parameter
+      callGoogleSearchAPI(text).then((output) => {
+         res.setHeader('Content-Type', 'application/json');
+         res.send(JSON.stringify({ 'speech': output, 'displayText': output }));    
+      }).catch((error) => {
+         res.setHeader('Content-Type', 'application/json');
+         res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
+      });
+   }
+   else if(intent == "my_weather" ){
+   // Get the city and date from the request
+     let city = req.body.result.parameters['geo-city']; // city is a required param
+     let state = "";
+     let country = "";
+     if(city == null){
+        //Obtain current location
+     }
+     if(req.body.result.parameters['geo-state-us'] != ""){
+        state = "," + req.body.result.parameters['geo-state-us'];
+     }
+     if(req.body.result.parameters['geo-country'] != ""){
+        country = "," + req.body.result.parameters['geo-country'];
+     }
+     city = city + state + country;
+     // Get the date for the weather forecast (if present)
+     let date = '';
+     if (req.body.result.parameters['date']) {
+       date = req.body.result.parameters['date'];
+       console.log('Date: ' + date);
+     }
+     // Call the weather API
+     callWeatherApi(city, date).then((output) => {
+       // Return the results of the weather API to Dialogflow
+       res.setHeader('Content-Type', 'application/json');
+       res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
+     }).catch((error) => {
+       // If there is an error let the user know
+       res.setHeader('Content-Type', 'application/json');
+       res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
+     });
+   }
+};
+   
 function callWeatherApi (city, date) {
   return new Promise((resolve, reject) => {
     // Create the path for the HTTP request to get the weather
     let path = '/premium/v1/weather.ashx?format=json&num_of_days=1' +
-      '&q=' + encodeURIComponent(city) + '&key=' + wwoApiKey + '&date=' + date;
-    console.log('API Request: ' + host + path);
+      '&q=' + encodeURIComponent(city) + '&key=' + weather_api_key + '&date=' + date;
+    console.log('API Request: ' + weather_host + path);
     // Make the HTTP request to get the weather
-    http.get({host: host, path: path}, (res) => {
+    http.get({host: weather_host, path: path}, (res) => {
       let body = ''; // var to store the response chunks
       res.on('data', (d) => { body += d; }); // store each response chunk
       res.on('end', () => {
@@ -78,3 +100,42 @@ function callWeatherApi (city, date) {
     });
   });
 }
+
+function callGoogleSearchAPI (text) {
+   return new Promise((resolve, reject) => {
+      let path = '/customsearch/v1?key=' + search_api_key + '&cx=' + cse_id + '&q=' + text;
+
+      console.log('API Request' + search_host + path);
+
+    // Make the HTTP request to get the search results
+    http.get({host: search_host, path: path}, (res) => {
+      let body = ''; // var to store the response chunks
+        res.on('data', (d) => { body += d; }); // store each response chunk
+        res.on('end', () => {
+          // After all the data has been received parse the JSON for desired data
+         let response = JSON.parse(body);
+  
+         let items = response['items'];
+
+         let totalResults = response['searchInformation'];
+
+//         let imFeelingLucky = items[0];
+/*
+         let output = `Total search results: ${totalResults}
+                       First Result:
+                          ${imFeelingLucky.title}
+                         ${imFeelingLucky.link} `;
+*/
+         let output = "hello world";
+          console.log(output);
+          resolve(output);
+        });
+        res.on('error', (error) => {
+          let new_error = "boahagfiauygrwasfe";
+          reject(new_error);
+//          reject(error);
+        });
+      });
+  });
+}
+
