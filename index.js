@@ -11,58 +11,61 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+
+
 'use strict';
-const http = require('http');
+const http = require('https');              //Google Custom Search requires ssl authentication
 const weather_host = 'api.worldweatheronline.com';
 const weather_api_key = 'b5d214a5bab843b49c1172848170811';
 
 const search_host = 'www.googleapis.com';
-const search_api_key = 'AlzaSyBHR7ched0g9KlxpWAzAZe1ld_7yi8Xovo';
-const cse_id = '007799595185471624536:jdruqtribrg';
+const search_api_key = 'AIzaSyBHR7ched0g9KlxpWAzAZe1Id_7yi8Xovo';
+const cse_id = '007799595185471624536%3Ajdruqtribrg';
 exports.lakki = (req, res) => {
 
-   let intent = req.body.result.metadata['intentName'];
+   let intent = req.body.queryResult.intent.displayName;
 
    if(intent == "my_google_search"){
-      let text = req.body.result.parameters['any'];   // any is a required parameter
+      let text = req.body.queryResult.parameters['any'];
       callGoogleSearchAPI(text).then((output) => {
          res.setHeader('Content-Type', 'application/json');
-         res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
+         res.send(JSON.stringify({ 'fulfillment_text': output}));
       }).catch((error) => {
          res.setHeader('Content-Type', 'application/json');
-         res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
+         res.send(JSON.stringify({ 'fulfillment_text': error}));
       });
    }
    else if(intent == "my_weather" ){
    // Get the city and date from the request
-     let city = req.body.result.parameters['geo-city']; // city is a required param
+     let city = req.body.queryResult.parameters['geo-city']; // city is a required param
      let state = "";
      let country = "";
      if(city == null){
         //Obtain current location
      }
-     if(req.body.result.parameters['geo-state-us'] != ""){
-        state = "," + req.body.result.parameters['geo-state-us'];
+     if(req.body.queryResult.parameters['geo-state-us'] != ""){
+        state = "," + req.body.queryResult.parameters['geo-state-us'];
      }
-     if(req.body.result.parameters['geo-country'] != ""){
-        country = "," + req.body.result.parameters['geo-country'];
+     if(req.body.queryResult.parameters['geo-country'] != ""){
+        country = "," + req.body.queryResult.parameters['geo-country'];
      }
      city = city + state + country;
      // Get the date for the weather forecast (if present)
      let date = '';
-     if (req.body.result.parameters['date']) {
-       date = req.body.result.parameters['date'];
+     if (req.body.queryResult.parameters['date']) {
+       date = req.body.queryResult.parameters['date'];
        console.log('Date: ' + date);
      }
      // Call the weather API
      callWeatherApi(city, date).then((output) => {
        // Return the results of the weather API to Dialogflow
        res.setHeader('Content-Type', 'application/json');
-       res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
+       res.send(JSON.stringify({ 'fulfillment_text': output}));
      }).catch((error) => {
        // If there is an error let the user know
        res.setHeader('Content-Type', 'application/json');
-       res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
+       res.send(JSON.stringify({ 'fulfillment_text': error}));
      });
    }
 };
@@ -103,7 +106,7 @@ function callWeatherApi (city, date) {
 
 function callGoogleSearchAPI (text) {
    return new Promise((resolve, reject) => {
-      let path = '/customsearch/v1?key=' + search_api_key + '&cx=' + cse_id + '&q=' + text;
+      let path = '/customsearch/v1?key=' + search_api_key + '&cx=' + cse_id + '&q=' + encodeURIComponent(text);
 
       console.log('API Request' + search_host + path);
 
@@ -117,23 +120,22 @@ function callGoogleSearchAPI (text) {
 
          let items = response['items'];
 
-         let totalResults = response['searchInformation'];
+         let totalResults = response['searchInformation']['formattedTotalResults'];
+         let totalTime = response['searchInformation']['formattedSearchTime'];
 
-//         let imFeelingLucky = items[0];
-/*
-         let output = `Total search results: ${totalResults}
-                       First Result:
-                          ${imFeelingLucky.title}
-                         ${imFeelingLucky.link} `;
-*/
-         let output = "hello world";
+         let imFeelingLucky = items[0];
+
+         let output = `Total search results: ${totalResults}\n
+                       Total search duration: ${totalTime}\n
+                       First Result:\n
+                       ${imFeelingLucky.title}
+                       ${imFeelingLucky.link} `;
+
           console.log(output);
           resolve(output);
         });
         res.on('error', (error) => {
-          let new_error = "boahagfiauygrwasfe";
-          reject(new_error);
-//          reject(error);
+          reject(error);
         });
       });
   });
