@@ -17,7 +17,7 @@
 'use strict';
 const http = require('https');              //Google Custom Search requires ssl authentication
 const weather_host = 'api.worldweatheronline.com';
-const weather_api_key = 'b5d214a5bab843b49c1172848170811';
+const weather_api_key = '0d2ce1bbfd704713a8a162217180801';
 
 const search_host = 'www.googleapis.com';
 const search_api_key = 'AIzaSyBHR7ched0g9KlxpWAzAZe1Id_7yi8Xovo';
