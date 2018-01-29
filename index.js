@@ -26,7 +26,7 @@ exports.lakki = (req, res) => {
 
    let intent = req.body.queryResult.intent.displayName;
 
-   if(intent == "my_google_search"){
+   if(intent == "my_google_search" || intent == "Default Fallback Intent"){
       let text = req.body.queryResult.parameters['any'];
       callGoogleSearchAPI(text).then((output) => {
          res.setHeader('Content-Type', 'application/json');
