@@ -65,9 +65,7 @@ exports.lakki = (req, res) => {
      }).catch((error) => {
        // If there is an error let the user know
        res.setHeader('Content-Type', 'application/json');
-       res.send(JSON.stringify({ 'fulfillment_text': error}));
-       res.send(JSON.stringify({ 'ITSAMEMARIO': 'hello'}));
-
+       res.send(JSON.stringify({ 'fulfillment_text': 'oops'}));
      });
    }
 };
