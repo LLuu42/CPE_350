@@ -17,7 +17,7 @@
 'use strict';
 const http = require('https');              //Google Custom Search requires ssl authentication
 const weather_host = 'api.worldweatheronline.com';
-const weather_api_key = '0d2ce1bbfd704713a8a162217180801';
+const weather_api_key = '45988dfb5fae49a1846171234182901';
 
 const search_host = 'www.googleapis.com';
 const search_api_key = 'AIzaSyBHR7ched0g9KlxpWAzAZe1Id_7yi8Xovo';
@@ -27,7 +27,7 @@ exports.lakki = (req, res) => {
    let intent = req.body.queryResult.intent.displayName;
 
    if(intent == "my_google_search" || intent == "Default Fallback Intent"){
-      let text = req.body.queryResult.parameters['any'];
+      let text = req.body.queryResult.queryText;
       callGoogleSearchAPI(text).then((output) => {
          res.setHeader('Content-Type', 'application/json');
          res.send(JSON.stringify({ 'fulfillment_text': output}));
