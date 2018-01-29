@@ -92,7 +92,9 @@ function callWeatherApi (city, date) {
         ${location['query']} are ${currentConditions} with a projected high of
         ${forecast['maxtempC']}C or ${forecast['maxtempF']}F and a low of
         ${forecast['mintempC']}C or ${forecast['mintempF']}F on
-        ${forecast['date']}.`;
+        ${forecast['date']}.
+
+        ${weather_host}${path}`;
         // Resolve the promise with the output text
         console.log(output);
         resolve(output);
