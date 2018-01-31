@@ -17,7 +17,7 @@
 'use strict';
 const http = require('https');              //Google Custom Search requires ssl authentication
 const weather_host = 'api.worldweatheronline.com';
-const weather_api_key = '45988dfb5fae49a1846171234182901';
+const weather_api_key = '0d2ce1bbfd704713a8a162217180801';
 
 const search_host = 'www.googleapis.com';
 const search_api_key = 'AIzaSyBHR7ched0g9KlxpWAzAZe1Id_7yi8Xovo';
@@ -65,7 +65,7 @@ exports.lakki = (req, res) => {
      }).catch((error) => {
        // If there is an error let the user know
        res.setHeader('Content-Type', 'application/json');
-       res.send(JSON.stringify({ 'fulfillment_text': 'oops'}));
+       res.send(JSON.stringify({ 'fulfillment_text': error}));
      });
    }
 };
