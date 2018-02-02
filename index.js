@@ -53,7 +53,7 @@ exports.lakki = (req, res) => {
      city = city + state + country;
      // Get the date for the weather forecast (if present)
      let date = '';
-     if (req.body.queryResult.parameters['date']) {
+     if (req.body.queryResult.parameters['date'] != "") {
        date = req.body.queryResult.parameters['date'];
        console.log('Date: ' + date);
      }
