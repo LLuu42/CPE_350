@@ -11,7 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Geocoding:
+//  https://maps.googleapis.com/maps/api/geocode/xml?address=San+Luis+Obispo&key=AIzaSyCkHrlXd689gOtezH8UTc_h_M0D9_vHV_4
 
+// timezondb
+//  http://api.timezonedb.com/v2/get-time-zone?key=8V0WC5W7SB8A&format=json&by=position&lat=35.2827524&lng=-120.6596156
 
 
 'use strict';
@@ -22,6 +26,7 @@ const weather_api_key = '0d2ce1bbfd704713a8a162217180801';
 const search_host = 'www.googleapis.com';
 const search_api_key = 'AIzaSyBHR7ched0g9KlxpWAzAZe1Id_7yi8Xovo';
 const cse_id = '007799595185471624536%3Ajdruqtribrg';
+
 exports.lakki = (req, res) => {
 
    let intent = req.body.queryResult.intent.displayName;
