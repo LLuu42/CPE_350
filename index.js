@@ -12,7 +12,7 @@
 // limitations under the License.
 
 // Geocoding:
-//  https://maps.googleapis.com/maps/api/geocode/xml?address=San+Luis+Obispo&key=AIzaSyCkHrlXd689gOtezH8UTc_h_M0D9_vHV_4
+//  https://maps.googleapis.com/maps/api/geocode/json?address=San+Luis+Obispo&key=AIzaSyCkHrlXd689gOtezH8UTc_h_M0D9_vHV_4
 
 // timezondb
 //  http://api.timezonedb.com/v2/get-time-zone?key=8V0WC5W7SB8A&format=json&by=position&lat=35.2827524&lng=-120.6596156
@@ -26,6 +26,13 @@ const weather_api_key = '0d2ce1bbfd704713a8a162217180801';
 const search_host = 'www.googleapis.com';
 const search_api_key = 'AIzaSyBHR7ched0g9KlxpWAzAZe1Id_7yi8Xovo';
 const cse_id = '007799595185471624536%3Ajdruqtribrg';
+
+const geo_host = 'maps.googleapis.com';
+const geo_api_key = 'AIzaSyCkHrlXd689gOtezH8UTc_h_M0D9_vHV_4';
+
+const time_host = 'api.timezonedb.com';
+const time_api_key = '8V0WC5W7SB8A';
+
 
 exports.lakki = (req, res) => {
 
@@ -74,6 +81,37 @@ exports.lakki = (req, res) => {
      });
    }
 };
+
+function getLngLat (location){
+  return new Promise((resolve, reject) => {
+    // Create the path for the HTTP request to get the weather
+    let path = '/maps/api/geocode/json?' +
+      'address=' + encodeURIComponent(location) + '&key=' + geo_api_key;
+    console.log('API Request: ' + geo_host + path);
+    // Make the HTTP request to get the weather
+    http.get({host: geo_host, path: path}, (res) => {
+      let body = ''; // var to store the response chunks
+      res.on('data', (d) => { body += d; }); // store each response chunk
+      res.on('end', () => {
+        // After all the data has been received parse the JSON for desired data
+        let response = JSON.parse(body);
+        let results = response['results'][0];
+        let geometry = results['geometry'];
+        let location = geometry['location'];
+        let lat = location['lat'];
+        let lng = locatoin['lng'];
+        // Create response
+        let output = lat+", "+lng;
+        // Resolve the promise with the output text
+        console.log(output);
+        resolve(output);
+      });
+      res.on('error', (error) => {
+        reject(error);
+      });
+    });
+  });
+}
 
 function callWeatherApi (city, date) {
   return new Promise((resolve, reject) => {
