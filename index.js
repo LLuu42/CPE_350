@@ -79,6 +79,8 @@ exports.lakki = (req, res) => {
        res.setHeader('Content-Type', 'application/json');
        res.send(JSON.stringify({ 'fulfillment_text': error}));
      });
+   } else if (intent == "my_time"){
+      //NEED TO ADD FUNCTIONALITY
    }
 };
 
