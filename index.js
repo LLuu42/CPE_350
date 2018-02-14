@@ -81,6 +81,30 @@ exports.lakki = (req, res) => {
         });
     } else if (intent == "my_time"){
         //NEED TO ADD FUNCTIONALITY
+     	let city = req.body.queryResult.parameters['geo-city']; // city is a required param
+      	let state = "";
+      	let country = "";
+      	let location = city;
+      
+      	if(req.body.queryResult.parameters['geo-state-us'] != ""){
+        	state = "," + req.body.queryResult.parameters['geo-state-us'];
+        	location += state;
+      	}
+      	if(req.body.queryResult.parameters['geo-country'] != ""){
+        	country = "," + req.body.queryResult.parameters['geo-country'];
+        	location += country;
+      	}
+
+      	// Call the geocoding API
+     	getLngLat(location).then((output) => {
+        	// Return the results of the weather API to Dialogflow
+        	res.setHeader('Content-Type', 'application/json');
+        	res.send(JSON.stringify({ 'fulfillment_text': output}));
+      	}).catch((error) => {
+        	// If there is an error let the user know
+        	res.setHeader('Content-Type', 'application/json');
+        	res.send(JSON.stringify({ 'fulfillment_text': error}));
+      	});
     }
 };
 
@@ -89,7 +113,8 @@ function getLngLat (location){
     // Create the path for the HTTP request to get the weather
     let path = '/maps/api/geocode/json?' +
         'address=' + encodeURIComponent(location) + '&key=' + geo_api_key;
-    console.log('API Request: ' + geo_host + path);
+
+  	//let path = '/maps/api/geocode/json?address=San%20Luis%20Obispo&key=AIzaSyCkHrlXd689gOtezH8UTc_h_M0D9_vHV_4';
     
     // Make the HTTP request to get the weather
     http.get({host: geo_host, path: path}, (res) => {
@@ -102,7 +127,7 @@ function getLngLat (location){
             let geometry = results['geometry'];
             let location = geometry['location'];
             let lat = location['lat'];
-            let lng = locatoin['lng'];
+            let lng = location['lng'];
             // Create response
             let output = lat+", "+lng;
             // Resolve the promise with the output text
