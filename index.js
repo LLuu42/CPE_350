@@ -86,8 +86,8 @@ exports.lakki = (req, res) => {
       	let country = "";
       	let location = city;
       
-      	if(req.body.queryResult.parameters['geo-state-us'] != ""){
-        	state = "," + req.body.queryResult.parameters['geo-state-us'];
+      	if(req.body.queryResult.parameters['geo-state'] != ""){
+        	state = "," + req.body.queryResult.parameters['geo-state'];
         	location += state;
       	}
       	if(req.body.queryResult.parameters['geo-country'] != ""){
