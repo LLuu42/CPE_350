@@ -33,7 +33,7 @@ const geo_api_key = 'AIzaSyCkHrlXd689gOtezH8UTc_h_M0D9_vHV_4';
 
 const time_host = 'api.timezonedb.com';
 const time_api_key = '8V0WC5W7SB8A';
-
+ 
 
 exports.lakki = (req, res) => {
 
@@ -50,18 +50,19 @@ exports.lakki = (req, res) => {
         });
     }
     else if(intent == "my_weather" ){
-        // Get the city and date from the request
         let city = req.body.queryResult.parameters['geo-city']; // city is a required param
         let state = "";
         let country = "";
-         
+        let location = city;
+      
         if(req.body.queryResult.parameters['geo-state-us'] != ""){
-            state = "," + req.body.queryResult.parameters['geo-state-us'];
+            state = ", " + req.body.queryResult.parameters['geo-state-us'];
+            location += state;
         }
         if(req.body.queryResult.parameters['geo-country'] != ""){
-            country = "," + req.body.queryResult.parameters['geo-country'];
+            country = ", " + req.body.queryResult.parameters['geo-country'];
+            location += country;
         }
-        city = city + state + country;
         
         // Get the date for the weather forecast (if present)
         let date = '';
@@ -69,25 +70,32 @@ exports.lakki = (req, res) => {
             date = req.body.queryResult.parameters['date'];
             console.log('Date: ' + date);
         }
-        // Call the weather API
-        callWeatherApi(city, date).then((output) => {
-            // Return the results of the weather API to Dialogflow
-            res.setHeader('Content-Type', 'application/json');
-            res.send(JSON.stringify({ 'fulfillment_text': output}));
+
+        // Call the geocoding API
+        callGeocodingAPI(location).then((output) => {
+            // Call the weather API
+            callWeatherApi(output, location, date).then((new_output) => {
+                res.setHeader('Content-Type', 'application/json');
+                res.send(JSON.stringify({ 'fulfillment_text': new_output}));
+            }).catch((new_error) => {
+                res.setHeader('Content-Type', 'application/json');
+                res.send(JSON.stringify({ 'fulfillment_text': new_error}));
+            });
         }).catch((error) => {
             // If there is an error let the user know
             res.setHeader('Content-Type', 'application/json');
             res.send(JSON.stringify({ 'fulfillment_text': error}));
         });
+
+        
     } else if (intent == "my_time"){
-        //NEED TO ADD FUNCTIONALITY
      	let city = req.body.queryResult.parameters['geo-city']; // city is a required param
       	let state = "";
       	let country = "";
       	let location = city;
       
-      	if(req.body.queryResult.parameters['geo-state-us'] != ""){
-        	state = "," + req.body.queryResult.parameters['geo-state-us'];
+      	if(req.body.queryResult.parameters['geo-state'] != ""){
+        	state = "," + req.body.queryResult.parameters['geo-state'];
         	location += state;
       	}
       	if(req.body.queryResult.parameters['geo-country'] != ""){
@@ -96,10 +104,15 @@ exports.lakki = (req, res) => {
       	}
 
       	// Call the geocoding API
-     	getLngLat(location).then((output) => {
-        	// Return the results of the weather API to Dialogflow
-        	res.setHeader('Content-Type', 'application/json');
-        	res.send(JSON.stringify({ 'fulfillment_text': output}));
+     	callGeocodingAPI(location).then((output) => {
+            //Call Timezone API
+     		callTimeAPI(output).then((new_output) => {
+     			res.setHeader('Content-Type', 'application/json');
+        		res.send(JSON.stringify({ 'fulfillment_text': new_output}));
+     		}).catch((new_error) => {
+     			res.setHeader('Content-Type', 'application/json');
+        		res.send(JSON.stringify({ 'fulfillment_text': new_error}));
+     		});
       	}).catch((error) => {
         	// If there is an error let the user know
         	res.setHeader('Content-Type', 'application/json');
@@ -108,7 +121,36 @@ exports.lakki = (req, res) => {
     }
 };
 
-function getLngLat (location){
+
+function callTimeAPI (latLng){
+	return new Promise((resolve, reject) =>{
+		let lat = latLng.split(",")[0].trim();
+		let lng = latLng.split(",")[1].trim();
+		let path = '/v2/get-time-zone?format=json&by=position' + '&key=' + time_api_key +
+			'&lat=' + lat + '&lng=' + lng;  
+		//let path = '/v2/get-time-zone?format=json&by=position&key=8V0WC5W7SB8A&lat=33.7489954&lng=-84.3879824';
+		http.get({host: time_host, path: path}, (res) => {
+        	let body = ''; // var to store the response chunks
+        	res.on('data', (d) => { body += d; }); // store each response chunk
+        	res.on('end', () => {
+            	// After all the data has been received parse the JSON for desired data
+            	let response = JSON.parse(body);
+            	let date_time = response['formatted'];
+            	// Create response
+            	let output = "Current Time is: " + date_time.split(" ")[1].trim();
+            	// Resolve the promise with the output text
+            	console.log(output);
+            	resolve(output);
+        	});
+        	res.on('error', (error) => {
+            	reject(error);
+        	});
+    	});
+	});
+};
+
+
+function callGeocodingAPI (location){
     return new Promise((resolve, reject) => {
     // Create the path for the HTTP request to get the weather
     let path = '/maps/api/geocode/json?' +
@@ -116,64 +158,61 @@ function getLngLat (location){
 
   	//let path = '/maps/api/geocode/json?address=San%20Luis%20Obispo&key=AIzaSyCkHrlXd689gOtezH8UTc_h_M0D9_vHV_4';
     
-    // Make the HTTP request to get the weather
-    http.get({host: geo_host, path: path}, (res) => {
-        let body = ''; // var to store the response chunks
-        res.on('data', (d) => { body += d; }); // store each response chunk
-        res.on('end', () => {
-            // After all the data has been received parse the JSON for desired data
-            let response = JSON.parse(body);
-            let results = response['results'][0];
-            let geometry = results['geometry'];
-            let location = geometry['location'];
-            let lat = location['lat'];
-            let lng = location['lng'];
-            // Create response
-            let output = lat+", "+lng;
-            // Resolve the promise with the output text
-            console.log(output);
-            resolve(output);
-        });
-        res.on('error', (error) => {
-            reject(error);
-        });
-    });
+    	// Make the HTTP request to get the weather
+    	http.get({host: geo_host, path: path}, (res) => {
+        	let body = ''; // var to store the response chunks
+        	res.on('data', (d) => { body += d; }); // store each response chunk
+        	res.on('end', () => {
+	            // After all the data has been received parse the JSON for desired data
+	            let response = JSON.parse(body);
+	            let results = response['results'][0];
+	            let geometry = results['geometry'];
+	            let location = geometry['location'];
+	            let lat = location['lat'];
+	            let lng = location['lng'];
+	            // Create response
+	            let output = lat+","+lng;
+	            // Resolve the promise with the output text
+	            console.log(output);
+	            resolve(output);
+	        });
+	        res.on('error', (error) => {
+	            reject(error);
+	        });
+    	});
     });
 }
 
-function callWeatherApi (city, date) {
+function callWeatherApi (latLong, location, date) {
     return new Promise((resolve, reject) => {
     // Create the path for the HTTP request to get the weather
     let path = '/premium/v1/weather.ashx?format=json&num_of_days=1' +
-        '&q=' + encodeURIComponent(city) + '&key=' + weather_api_key + '&date=' + date;
+        '&q=' + encodeURIComponent(latLong) + '&key=' + weather_api_key + '&date=' + date;
     console.log('API Request: ' + weather_host + path);
     // Make the HTTP request to get the weather
     http.get({host: weather_host, path: path}, (res) => {
         let body = ''; // var to store the response chunks
         res.on('data', (d) => { body += d; }); // store each response chunk
         res.on('end', () => {
-            // After all the data has been received parse the JSON for desired data
-            let response = JSON.parse(body);
-            let forecast = response['data']['weather'][0];
-            let location = response['data']['request'][0];
-            let conditions = response['data']['current_condition'][0];
-            let currentConditions = conditions['weatherDesc'][0]['value'];
-            // Create response
-            let output = `Current conditions in the ${location['type']}
-            ${location['query']} are ${currentConditions} with a projected high of
-            ${forecast['maxtempC']}C or ${forecast['maxtempF']}F and a low of
-            ${forecast['mintempC']}C or ${forecast['mintempF']}F on
-            ${forecast['date']}.
-
-            ${weather_host}${path}`;
-            // Resolve the promise with the output text
-            console.log(output);
-            resolve(output);
-        });
-        res.on('error', (error) => {
-            reject(error);
-        });
-    });
+	            // After all the data has been received parse the JSON for desired data
+	            let response = JSON.parse(body);
+	            let forecast = response['data']['weather'][0];
+	            let conditions = response['data']['current_condition'][0];
+	            let currentConditions = conditions['weatherDesc'][0]['value'];
+	            // Create response
+	            let output = `Current conditions in ${location}
+                    are ${currentConditions} with a projected high of
+	               ${forecast['maxtempC']}C or ${forecast['maxtempF']}F and a low of
+	               ${forecast['mintempC']}C or ${forecast['mintempF']}F on
+	               ${forecast['date']}.`;
+	            // Resolve the promise with the output text
+	            console.log(output);
+	            resolve(output);
+	        });
+	        res.on('error', (error) => {
+	            reject(error);
+	        });
+    	});
     });
 }
 
@@ -187,24 +226,24 @@ function callGoogleSearchAPI (text) {
         let body = ''; // var to store the response chunks
         res.on('data', (d) => { body += d; }); // store each response chunk
         res.on('end', () => {
-            // After all the data has been received parse the JSON for desired data
-            let response = JSON.parse(body);
-            let items = response['items'];
-            let totalResults = response['searchInformation']['formattedTotalResults'];
-            let totalTime = response['searchInformation']['formattedSearchTime'];
-            let imFeelingLucky = items[0];
-            let output = `Total search results: ${totalResults}\n
-                           Total search duration: ${totalTime}\n
-                           First Result:\n
-                           ${imFeelingLucky.title}
-                           ${imFeelingLucky.link} `;
+                // After all the data has been received parse the JSON for desired data
+                let response = JSON.parse(body);
+                let items = response['items'];
+                let totalResults = response['searchInformation']['formattedTotalResults'];
+                let totalTime = response['searchInformation']['formattedSearchTime'];
+                let imFeelingLucky = items[0];
+                let output = `Total search results: ${totalResults}\n
+                    Total search duration: ${totalTime}\n
+                    First Result:\n
+                    ${imFeelingLucky.title}
+                    ${imFeelingLucky.link} `;
 
-            console.log(output);
-            resolve(output);
+                console.log(output);
+                resolve(output);
+            });
+            res.on('error', (error) => {
+                reject(error);
+            });
         });
-        res.on('error', (error) => {
-            reject(error);
-        });
-    });
     });
 }
