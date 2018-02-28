@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'weather',
     'social_django',
+    'lakki',
     #'social.apps.django_app.default',
 ]
 
@@ -63,6 +64,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.user.create_user',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.debug.debug',
+    'lakki.pipeline.save_profile',
     'social.pipeline.social_auth.load_extra_data',
     'social.pipeline.user.user_details',
     'social.pipeline.debug.debug',
@@ -73,7 +75,8 @@ SOCIAL_AUTH_GOOGLE_PLUS_IGNORE_DEFAULT_SCOPE = True
 SOCIAL_AUTH_GOOGLE_PLUS_SCOPE = [
     'https://www.googleapis.com/auth/plus.login',
     'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile'
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'https://www.googleapis.com/auth/gmail.modify',
 ]
 
 LOGIN_URL = 'login'
