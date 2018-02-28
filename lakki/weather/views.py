@@ -3,11 +3,14 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 from django.template import loader
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 from django.http import HttpResponse, JsonResponse
 import json
 import commands
 import unirest
 import requests
+import time
 
 def index(request):
     return render(request, "index.html", {})
@@ -26,3 +29,19 @@ def dialogFlowRequestHandler(request):
         return JsonResponse(response.json())
     else:
         return HttpResponse("Incorrect http method", status=405);
+
+def dialogFlowAudioHandler(request):
+    if (request.method == 'POST'):
+        #print request.body
+        #print "----------------------"
+        #print request.FILES
+        #print dir(request.POST)
+        newfile = open("file.wav", "wb")
+        #print request.POST['fname']
+        #print request.POST.items
+        #print request.POST.values
+        #print request.POST.viewitems
+        blob = request.FILES['blob']
+        path = default_storage.save('tmp/somename.mp3', ContentFile(blob.read()))
+        #newfile.write(blob.decode('base64'))
+        newfile.close()

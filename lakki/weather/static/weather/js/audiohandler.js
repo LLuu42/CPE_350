@@ -1,6 +1,7 @@
 var record = document.querySelector('#record');
 var stop = document.querySelector('#stop');
 var clips = document.querySelector('#clips');
+var url = location.protocol + "//" + location.host + "/weather/audio";
 
 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     console.log('getUserMedia supported!');
@@ -53,25 +54,23 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 
             var blob = new Blob(chunks, {'type' : 'audio/wav'});
             console.log(blob);
+            var fd = new FormData();
+            fd.append('blob', blob);
+            fd.append('rip', 5);
+            fd.append('fname', 'audio.wav');
             chunks = [];
 
             $.ajax({
                 type: "POST",
                 url: url,
-                data: {
-                    "input": text,
-                    "session": session
-                },
-                beforeSend: function(xhr) {
-                    textarea.val('');
-                    $("#returned").empty();
-                    $("<p>loading...</p>").appendTo("#returned");
-                    console.log(text);
-                }
-
+                data: fd,
+                processData: false,
+                contentType: false,
             }).done(function(data) {
                 console.log("successful!");
             });
+
+            console.log("ajskl;daj;sl");
 
             /*
             var audioURL = window.URL.createObjectURL(blob);
