@@ -44,12 +44,19 @@ def dialogFlowAudioHandler(request):
         parameters = json.dumps({'queryInput' : {'audioConfig': audioConfig}, 'inputAudio' : encodedAudio})
         url = "https://dialogflow.googleapis.com/v2beta1/projects/local-circuit-181715/agent/sessions/fa80a7e4-ba2c-4465-a516-b8d2c6ea950f:detectIntent"
         headers={"Accept": "application/json; charset=utf-8", "Authorization": "Bearer " + gcloud_access_token}
-        response = requests.post(url, headers = headers, data = parameters)
-        print response.json()
-        return JsonResponse(response.json())
+        response = requests.post(url, headers = headers, data = parameters).json()
+        print response
+        text = ""
+        if 'fulfillmentText' in response['queryResult']:
+            text = response['queryResult']['fulfillmentText']
+        else:
+            text = "I could not understand that, please try again."
+        soundfile = translateTextToSpeech(text)
+        soundfile.seek(0)
+        return JsonResponse({'mp3' : base64.b64encode(soundfile.read())})
 
 def translateTextToSpeech(text):
     file = tempfile.TemporaryFile()
     tts = gTTS(text=text, lang='en', slow=False)
-    tts.write_to_fp(f)
-    return f
+    tts.write_to_fp(file)
+    return file
