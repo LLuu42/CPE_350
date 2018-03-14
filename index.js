@@ -19,10 +19,11 @@
 
 
 'use strict';
-const http = require('https');              //Google Custom Search requires ssl authentication
+const http = require('http');               //Joke API requires no ssl
+const https = require('https');              //Google Custom Search requires ssl authentication
 const fs = require('fs');
 const weather_host = 'api.worldweatheronline.com';
-const weather_api_key = '0d2ce1bbfd704713a8a162217180801';
+const weather_api_key = 'f5d74c18030441ae8be173926180903';
 
 const search_host = 'www.googleapis.com';
 const search_api_key = 'AIzaSyBHR7ched0g9KlxpWAzAZe1Id_7yi8Xovo';
@@ -33,6 +34,8 @@ const geo_api_key = 'AIzaSyCkHrlXd689gOtezH8UTc_h_M0D9_vHV_4';
 
 const time_host = 'api.timezonedb.com';
 const time_api_key = '8V0WC5W7SB8A';
+
+const joke_api = 'api.yomomma.info';
  
 
 exports.lakki = (req, res) => {
@@ -118,7 +121,35 @@ exports.lakki = (req, res) => {
         	res.setHeader('Content-Type', 'application/json');
         	res.send(JSON.stringify({ 'fulfillment_text': error}));
       	});
+    } else if (intent == "joke"){
+        callJokeAPI().then((output) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.send(JSON.stringify({ 'fulfillment_text': output}));
+        }).catch((error) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.send(JSON.stringify({ 'fulfillment_text': error}));
+        });
     }
+};
+
+function callJokeAPI(){
+    return new Promise((resolve, reject) =>{
+        http.get({host: joke_api, path: ''}, (res) => {
+            let body = ''; // var to store the response chunks
+            res.on('data', (d) => { body += d; }); // store each response chunk
+            res.on('end', () => {
+                // After all the data has been received parse the JSON for desired data
+                let response = JSON.parse(body);
+                let joke = response['joke'];
+                
+                console.log(joke);
+                resolve(joke);
+            });
+            res.on('error', (error) => {
+                reject(error);
+            }); 
+        });
+    });
 };
 
 
@@ -129,7 +160,7 @@ function callTimeAPI (latLng){
 		let path = '/v2/get-time-zone?format=json&by=position' + '&key=' + time_api_key +
 			'&lat=' + lat + '&lng=' + lng;  
 		//let path = '/v2/get-time-zone?format=json&by=position&key=8V0WC5W7SB8A&lat=33.7489954&lng=-84.3879824';
-		http.get({host: time_host, path: path}, (res) => {
+		https.get({host: time_host, path: path}, (res) => {
         	let body = ''; // var to store the response chunks
         	res.on('data', (d) => { body += d; }); // store each response chunk
         	res.on('end', () => {
@@ -159,7 +190,7 @@ function callGeocodingAPI (location){
   	//let path = '/maps/api/geocode/json?address=San%20Luis%20Obispo&key=AIzaSyCkHrlXd689gOtezH8UTc_h_M0D9_vHV_4';
     
     	// Make the HTTP request to get the weather
-    	http.get({host: geo_host, path: path}, (res) => {
+    	https.get({host: geo_host, path: path}, (res) => {
         	let body = ''; // var to store the response chunks
         	res.on('data', (d) => { body += d; }); // store each response chunk
         	res.on('end', () => {
@@ -190,7 +221,7 @@ function callWeatherApi (latLong, location, date) {
         '&q=' + encodeURIComponent(latLong) + '&key=' + weather_api_key + '&date=' + date;
     console.log('API Request: ' + weather_host + path);
     // Make the HTTP request to get the weather
-    http.get({host: weather_host, path: path}, (res) => {
+    https.get({host: weather_host, path: path}, (res) => {
         let body = ''; // var to store the response chunks
         res.on('data', (d) => { body += d; }); // store each response chunk
         res.on('end', () => {
@@ -222,7 +253,7 @@ function callGoogleSearchAPI (text) {
     console.log('API Request' + search_host + path);
 
     // Make the HTTP request to get the search results
-    http.get({host: search_host, path: path}, (res) => {
+    https.get({host: search_host, path: path}, (res) => {
         let body = ''; // var to store the response chunks
         res.on('data', (d) => { body += d; }); // store each response chunk
         res.on('end', () => {

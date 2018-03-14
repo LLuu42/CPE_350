@@ -8,17 +8,25 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="index.css">
 </head>
 <body>
+    <div>
+        <br>
+        <br>
+        <br>
+    </div>
     <div class="container">
         <div class="row">
             <div class="col-md-offset-2 col-md-8 col-sm-offset-2 col-sm-8 col-lg-offset-2 col-lg-8">
-                <h2>Got a recommendation?</h2>
+                <img src="{% static "weather/js/Lakki-logo.png" %}" alt="LAKKI">
                 <form id='form-submit'>
                     <div class="form-group">
                         <label for="taskInput">Task</label>
                         <textarea id="taskInput" class="form-control" rows="2" placeholder="Talk to lakki..." required=""></textarea>
-                        <br><button type="submit">Bombs Away!</button>
+                        <br><button id='record'>Record</button>
+                        <button id="stop">Stop</button>
+                        <button type="submit" class ="pull-right">Send</button>
                     </div>
                 </form>
             </div>
@@ -27,10 +35,19 @@
             </div>
         </div>
     </div>
-    <button id='record'>Record</button>
-    <button id="stop">Stop</button>
+<!--    
     <div id="clips">
     </div>
+    <div style="padding-left:25px" align="center">
+        <img style="width:300px;height=auto;" src="{% static "weather/js/google_example.png" %}" alt="Google Search example">
+    
+        <img style="width:300px;height=auto;" src="{% static "weather/js/joke_example.png" %}" alt="Google Search example">
+   
+        <img style="width:300px;height=auto;" src="{% static "weather/js/time_example.png" %}" alt="Google Search example">
+   
+        <img style="width:300px;height=auto;" src="{% static "weather/js/google_example.png" %}" alt="Google Search example">
+    </div>
+-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="//www.WebRTC-Experiment.com/RecordRTC.js"></script>
