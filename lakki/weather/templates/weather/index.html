@@ -19,11 +19,14 @@
     <div class="container">
         <div class="row">
             <div class="col-md-offset-2 col-md-8 col-sm-offset-2 col-sm-8 col-lg-offset-2 col-lg-8">
-                <img src="{% static "weather/js/Lakki-logo.png" %}" alt="LAKKI">
+                <div align="center">
+                    <img sytle="width=30px" src="{% static "weather/js/Lakki-logo.png" %}" alt="LAKKI">
+                </div>
                 <form id='form-submit'>
                     <div class="form-group">
-                        <label for="taskInput">Task</label>
-                        <textarea id="taskInput" class="form-control" rows="2" placeholder="Talk to lakki..." required=""></textarea>
+                        <br>
+                        <textarea id="taskInput" class="form-control" rows="2" placeholder="How can I help you?" required=""></textarea>
+
                         <br><button id='record'>Record</button>
                         <button id="stop">Stop</button>
                         <button type="submit" class ="pull-right">Send</button>
