@@ -8,17 +8,23 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="index.css">
 </head>
 <body>
     <div class="container">
         <div class="row">
             <div class="col-md-offset-2 col-md-8 col-sm-offset-2 col-sm-8 col-lg-offset-2 col-lg-8">
-                <h2>Got a recommendation?</h2>
+                <h2 style="font-family:Century Gothic;font-weight:bold">Lakki: Your Personal Assistant</h2>
                 <form id='form-submit'>
                     <div class="form-group">
                         <label for="taskInput">Task</label>
                         <textarea id="taskInput" class="form-control" rows="2" placeholder="Talk to lakki..." required=""></textarea>
-                        <br><button type="submit">Bombs Away!</button>
+                        <br><button id='record'>Record</button>
+                        <button id="stop">Stop</button>
+                        <button type="submit" class ="pull-right">Send</button>
+                    </div>
+                    <div>
+                        <p>Example Requests: Weather, Google, Time, Jokes</p>
                     </div>
                 </form>
             </div>
@@ -27,9 +33,11 @@
             </div>
         </div>
     </div>
-    <button id='record'>Record</button>
-    <button id="stop">Stop</button>
+    
     <div id="clips">
+    </div>
+    <div>
+        <img src="google_example.png" alt="Google Search example">
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
