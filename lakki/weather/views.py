@@ -10,6 +10,11 @@ import json, commands, unirest, requests, time, base64, ipdb, tempfile
 from gtts import gTTS
 
 def index(request):
+    print dir(request.user)
+    if request.user.is_authenticated:
+        print "hi"
+    else:
+        print "bye"
     return render(request, "index.html", {})
     #return render(request, loader.get_template('index.html'))
 
@@ -48,13 +53,24 @@ def dialogFlowAudioHandler(request):
         print response
         text = ""
         command = response['queryResult']['queryText']
+        intent = response['queryResult']['intent']['displayName']
+        url = ""
         if 'fulfillmentText' in response['queryResult']:
-            text = response['queryResult']['fulfillmentText']
+            if intent == 'my_google_search':
+                parameter = response['queryResult']['parameters']['any']
+                query = response['queryResult']['fulfillmentText']
+                text = "I just searched " + parameter + " for you."
+                if query == "Could not find what you are looking for":
+                    url = ""
+                else:
+                    url = response['queryResult']['fulfillmentText'].replace(" ", "%20")
+            else:
+                text = response['queryResult']['fulfillmentText']
         else:
             text = "I could not understand that, please try again."
         soundfile = translateTextToSpeech(text)
         soundfile.seek(0)
-        return JsonResponse({'mp3' : base64.b64encode(soundfile.read()), 'command' : command})
+        return JsonResponse({'mp3' : base64.b64encode(soundfile.read()), 'command' : command, 'intent' : intent, 'url' : url})
 
 def translateTextToSpeech(text):
     file = tempfile.TemporaryFile()

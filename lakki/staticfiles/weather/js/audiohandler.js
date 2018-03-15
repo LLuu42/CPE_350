@@ -1,38 +1,47 @@
 var record = document.querySelector('#record');
 var stop = document.querySelector('#stop');
 var clips = document.querySelector('#clips');
+var audioEndpoint = location.protocol + "//" + location.host + "/lakki/audio";
 
-if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    console.log('getUserMedia supported!');
-    navigator.mediaDevices.getUserMedia({
-        audio: true
-    }).then(function(stream) {
-        var mediaRecorder = new MediaRecorder(stream);
-        record.onclick = function() {
-            mediaRecorder.start();
-            console.log(mediaRecorder.state);
-            console.log("recorder started");
-            record.style.background = "red";
-            record.style.color = "black";
-        }
+var session = {
+  audio: true,
+  video: false
+};
 
-        var chunks = [];
+var recordRTC = null;
 
-        mediaRecorder.ondataavailable = function(e) {
-            chunks.push(e.data);
-        }
+function handleSuccess(stream) {
 
-        stop.onclick = function() {
-            mediaRecorder.stop();
-            console.log(mediaRecorder.state);
-            console.log("recorder stopped");
-            record.style.background = "";
-            record.style.color = "";
-        }
+    var harkOptions = {};
+    var speechEvents = hark(stream, harkOptions);
 
-        mediaRecorder.onstop = function(e) {
-            console.log("recorder stopped");
+    speechEvents.on('speaking', function (){
+        console.log("speaking");
+    });
 
+    speechEvents.on('stopped_speaking', function () {
+        console.log("stopped speaking");
+    });
+
+    var options = {
+        recorderType: StereoAudioRecorder,
+        mimeType: 'audio/wav',
+        numberOfAudioChannels: 1,
+        desiredSampRate: 16 * 1000,
+    };
+    recordRTC = RecordRTC(stream, options);
+    record.onclick = function() {
+        recordRTC.startRecording();
+        console.log("recorder started");
+        record.style.background = "red";
+        record.style.color = "black";
+    }
+
+    stop.onclick = function() {
+        recordRTC.stopRecording(function(audioURL) {
+            var recordedBlob = recordRTC.getBlob();
+
+            /*
             var clipName = prompt("Enter a name for your sound clip.");
             var clipContainer = document.createElement('article');
             var clipLabel = document.createElement('p');
@@ -49,40 +58,54 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             clipContainer.appendChild(deleteButton);
             clips.appendChild(clipContainer);
 
-            var blob = new Blob(chunks, {'type' : 'audio/wav'});
-            console.log(blob);
-            chunks = [];
-
-            var audioURL = window.URL.createObjectURL(blob);
-            console.log(audioURL);
             audio.src = audioURL;
+            */
 
-            deleteButton.onclick = function(e) {
-                var eventTarget = e.target;
-                eventTarget.parentNode.parentNode.removeChild(eventTarget.parentNode);
-            }
+            /*
+            recordRTC.getDataURL(function(dataURL) {
+                console.log(dataURL);
+            });
+            */
 
-        }
+            var fd = new FormData();
+            fd.append('blob', recordedBlob);
 
-    }).catch(function(err) {
-        console.log(err);
-    });
-} else {
-    console.log("Media not supported.");
+            $.ajax({
+                type: "POST",
+                url: audioEndpoint,
+                data: fd,
+                processData: false,
+                contentType: false,
+            }).done(function(data) {
+                console.log("successful!");
+                console.log(data);
+                var snd = new Audio("data:audio/mpeg;base64," + data.mp3);
+                snd.play();
+                if (data.url != "") {
+                    window.open(data.url, "_blank");
+                }
+                $("<li>" + data.command + "</li>").appendTo("#queries");
+            });
+
+            recordRTC.reset();
+
+        });
+        console.log("recorder stopped");
+        record.style.background = "";
+        record.style.color = "";
+
+
+    }
+
 }
 
-/*
-var handleSuccess = function(stream) {
-    var context = new AudioContext();
-    var source = context.createMediaStreamSource(stream);
-    var processor = context.createScriptProcessor(1024, 1, 1);
+function onError(error) {
+    console.log(error);
+}
 
-    source.connect(processor);
-    processor.connect(context.destination);
-
-    processor.onaudioprocess = function(e) {
-      // Do something with the data, i.e Convert this to WAV
-      console.log(e.inputBuffer);
-    };
-};
-*/
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    console.log("supported");
+    navigator.getUserMedia(session, handleSuccess, onError);
+} else {
+    console.log("not supported");
+}

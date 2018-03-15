@@ -5,14 +5,14 @@ $(document).ready(function() {
     $("#form-submit").on("submit", function(e) {
         e.preventDefault();
 
-        url = location.protocol + "//" + location.host + "/weather/stuff"
+        textEndpoint = location.protocol + "//" + location.host + "/lakki/stuff"
 
         var textarea = $('textarea#taskInput');
         var text = textarea.val();
         console.log(text);
         $.ajax({
             type: "POST",
-            url: url,
+            url: textEndpoint,
             data: {
                 "input": text,
                 "session": session
