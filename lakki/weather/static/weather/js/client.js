@@ -5,7 +5,7 @@ $(document).ready(function() {
     $("#form-submit").on("submit", function(e) {
         e.preventDefault();
 
-        textEndpoint = location.protocol + "//" + location.host + "/weather/stuff"
+        textEndpoint = location.protocol + "//" + location.host + "/lakki/stuff"
 
         var textarea = $('textarea#taskInput');
         var text = textarea.val();
