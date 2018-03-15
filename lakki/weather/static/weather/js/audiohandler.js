@@ -69,6 +69,7 @@ function handleSuccess(stream) {
                 console.log(data);
                 var snd = new Audio("data:audio/mpeg;base64," + data.mp3);
                 snd.play();
+                $("<p>" + data.command + "</p>").appendTo("#returned");
             });
 
             recordRTC.reset();

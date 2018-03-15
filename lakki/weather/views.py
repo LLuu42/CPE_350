@@ -47,13 +47,14 @@ def dialogFlowAudioHandler(request):
         response = requests.post(url, headers = headers, data = parameters).json()
         print response
         text = ""
+        command = response['queryResult']['queryText']
         if 'fulfillmentText' in response['queryResult']:
             text = response['queryResult']['fulfillmentText']
         else:
             text = "I could not understand that, please try again."
         soundfile = translateTextToSpeech(text)
         soundfile.seek(0)
-        return JsonResponse({'mp3' : base64.b64encode(soundfile.read())})
+        return JsonResponse({'mp3' : base64.b64encode(soundfile.read()), 'command' : command})
 
 def translateTextToSpeech(text):
     file = tempfile.TemporaryFile()
